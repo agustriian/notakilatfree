@@ -1,4 +1,4 @@
-const CACHE = "notakilat-shell-v5";
+const CACHE = "notakilat-shell-v6";
 const ASSETS = [
   "./",
   "./index.html",
