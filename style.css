@@ -152,3 +152,46 @@ button{cursor:pointer}
 .nav-item.locked{position:relative;padding-right:38px}.nav-lock{margin-left:auto;font-size:11px;opacity:.72}.nav-item.locked:hover{background:#fff8f2;color:#b85a08}.upgrade-modal{z-index:1000;background:rgba(15,23,42,.62);backdrop-filter:blur(3px)}.upgrade-card{position:relative;width:min(430px,calc(100vw - 28px));padding:30px 24px 24px;text-align:center;border-radius:22px}.upgrade-close{position:absolute;right:14px;top:14px;border:0;background:#f2f3f5;border-radius:10px;width:34px;height:34px;font-size:23px;color:#555}.upgrade-icon{width:64px;height:64px;border-radius:20px;background:#fff0e1;display:grid;place-items:center;font-size:30px;margin:0 auto 12px}.upgrade-badge{display:inline-block;font-size:10px;font-weight:900;letter-spacing:.08em;color:#d86100;background:#fff0e1;border-radius:999px;padding:6px 10px;margin-bottom:10px}.upgrade-card h2{font-size:24px;margin-bottom:8px}.upgrade-card p{font-size:13px;color:#737780;line-height:1.6;margin-bottom:18px}.upgrade-btn,.whatsapp-upgrade{display:flex;justify-content:center;align-items:center;width:100%;text-decoration:none;margin-top:9px}.whatsapp-upgrade{background:#eaf9ef;color:#16803e;border-radius:9px;padding:11px 17px;font-weight:700}.upgrade-card small{display:block;color:#9a9da3;font-size:10px;margin-top:14px}.upgrade-card .btn.primary:hover{background:#e96d00}
 @media(max-width:800px){.topbar{height:62px;min-width:0;overflow:hidden}.sidebar{top:62px}.main-content{padding:14px 10px;overflow-x:hidden}.panel{padding:15px;border-radius:12px}.page-head{margin-bottom:15px}.page-head h1{font-size:22px}.page-head p{font-size:12px}.form-actions{flex-direction:column}.form-actions .btn{width:100%}.row-between{align-items:flex-start;flex-direction:column}.row-between .btn{width:100%}.invoice-bottom{gap:12px}.items-table{min-width:820px}.upgrade-card{padding:28px 18px 20px}}
 @media(max-width:480px){.brand-mark{width:34px;height:34px;border-radius:10px}.brand-name{font-size:17px}.brand small{font-size:9px}.top-actions{gap:6px}.icon-btn{width:36px;height:36px}.mobile-menu{width:36px;height:36px}.sidebar{width:min(270px,88vw)}.main-content{padding:12px 8px}.panel{padding:13px}.invoice-paper{padding:18px}.invoice-summary{width:100%}.modal{padding:10px}.modal-card{padding:17px;border-radius:14px}.upgrade-card{border-radius:20px}.upgrade-card h2{font-size:21px}}
+
+/* V14 MOBILE LAYOUT FIX
+   Mobile uses a block app shell so the content area is exactly the viewport width.
+   This prevents headings/forms from being clipped on the left when the sidebar is fixed.
+*/
+@media (max-width: 800px){
+  html, body { width:100%; max-width:100%; overflow-x:hidden; }
+  .app-shell { display:block; width:100%; min-width:0; }
+  .main-content {
+    display:block;
+    width:100%;
+    max-width:none;
+    min-width:0;
+    margin:0;
+    padding:14px 12px 28px;
+    overflow:visible;
+  }
+  .page, .page.active, .page-head, .panel, .form-grid, .invoice-layout, .invoice-bottom {
+    width:100%;
+    max-width:100%;
+    min-width:0;
+  }
+  .page-head > div, .panel-head > div { min-width:0; max-width:100%; }
+  .page-head h1, .page-head p, .panel-head h2, .panel-head p {
+    max-width:100%;
+    overflow-wrap:anywhere;
+  }
+  .field, .field input, .field textarea, .field select { min-width:0; max-width:100%; }
+  .invoice-layout .panel { overflow:hidden; }
+}
+@media (max-width:480px){
+  .main-content { padding:12px 10px 24px; }
+  .page-head h1 { font-size:22px; line-height:1.2; }
+  .page-head p { font-size:12px; line-height:1.45; }
+  .panel { padding:14px 12px; }
+  .field label { font-size:13px; }
+  .field input, .field textarea, .field select {
+    width:100%;
+    min-height:48px;
+    font-size:16px;
+  }
+  .field textarea { min-height:100px; }
+}
