@@ -1,0 +1,9 @@
+{
+  "name": "NotaKilat Pro",
+  "short_name": "NotaKilat",
+  "start_url": "./",
+  "display": "standalone",
+  "background_color": "#ffffff",
+  "theme_color": "#ff7a00",
+  "description": "Aplikasi nota digital 100% offline dengan database lokal di perangkat"
+}

@@ -1,0 +1,415 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="theme-color" content="#ff7a00">
+  <link rel="manifest" href="manifest.webmanifest">
+  <meta name="theme-color" content="#ff7a00">
+  <title>NotaKilat Free</title>
+  <link rel="stylesheet" href="style.css">
+</head>
+<body>
+<div id="toast"></div>
+
+<header class="topbar">
+  <div class="brand">
+    <button class="mobile-menu" onclick="toggleSidebar()">☰</button>
+    <div class="brand-mark">NK</div>
+    <div>
+      <div class="brand-name">Nota<span>Kilat</span></div>
+      <small>FREE</small>
+    </div>
+  </div>
+  <div class="top-actions">
+    <span id="storeNameTop">Toko Saya</span>
+    <button class="icon-btn" onclick="showPage('profil')" title="Profil">⚙</button>
+  </div>
+</header>
+
+<div class="app-shell">
+  <aside id="sidebar" class="sidebar">
+    <nav>
+      <button class="nav-item locked" data-page="dashboard" onclick="showPage('dashboard')">🏠 <span>Dashboard</span><b class="nav-lock">🔒</b></button>
+      <button class="nav-item active" data-page="nota" onclick="showPage('nota')">🧾 <span>Buat Nota</span></button>
+      <button class="nav-item locked" data-page="produk" onclick="showPage('produk')">📦 <span>Produk</span><b class="nav-lock">🔒</b></button>
+      <button class="nav-item locked" data-page="kulakan" onclick="showPage('kulakan')">🛒 <span>Kulakan</span><b class="nav-lock">🔒</b></button>
+      <button class="nav-item locked" data-page="supplier" onclick="showPage('supplier')">📇 <span>Supplier</span><b class="nav-lock">🔒</b></button>
+      <button class="nav-item locked" data-page="pelanggan" onclick="showPage('pelanggan')">👥 <span>Pelanggan</span><b class="nav-lock">🔒</b></button>
+      <button class="nav-item locked" data-page="laporan" onclick="showPage('laporan')">📊 <span>Laporan</span><b class="nav-lock">🔒</b></button>
+      <button class="nav-item" data-page="profil" onclick="showPage('profil')">🏪 <span>Profil Toko</span></button>
+    </nav>
+    <div class="sidebar-bottom">
+      <div class="storage-badge">💾 Data tersimpan otomatis di perangkat</div>
+      <button class="nav-item locked" data-page="database" onclick="showPage('database')">🗄️ <span>Data & Database</span><b class="nav-lock">🔒</b></button>
+      <input id="importCsvInput" type="file" accept=".csv,text/csv" hidden onchange="importCsv(this.files[0])">
+      <input id="importJsonInput" type="file" accept=".json,application/json" hidden onchange="importBackupJson(this.files[0])">
+    </div>
+  </aside>
+
+  <main class="main-content">
+    <!-- DASHBOARD -->
+    <section id="page-dashboard" class="page active">
+      <div class="page-head">
+        <div>
+          <h1>Dashboard</h1>
+          <p>Ringkasan bisnis kamu.</p>
+        </div>
+        <button class="btn primary" onclick="newInvoice()">＋ Buat Nota</button>
+      </div>
+
+      <div class="stats-grid">
+        <div class="stat-card">
+          <div class="stat-icon orange">💰</div>
+          <div><span>Total Omset Lunas</span><strong id="statRevenue">Rp 0</strong></div>
+        </div>
+        <div class="stat-card">
+          <div class="stat-icon purple">🧾</div>
+          <div><span>Jumlah Nota</span><strong id="statInvoices">0</strong></div>
+        </div>
+        <div class="stat-card">
+          <div class="stat-icon blue">⏳</div>
+          <div><span>Piutang</span><strong id="statReceivable">Rp 0</strong></div>
+        </div>
+        <div class="stat-card">
+          <div class="stat-icon red">⚠️</div>
+          <div><span>Jatuh Tempo</span><strong id="statDue">0</strong></div>
+        </div>
+      </div>
+
+      <div class="dashboard-grid">
+        <div class="panel">
+          <div class="panel-head">
+            <div><h2>Tren Omset</h2><p>12 transaksi terbaru</p></div>
+            <select id="dashboardFilter" onchange="renderDashboard()">
+              <option value="all">Semua Waktu</option>
+              <option value="today">Hari Ini</option>
+              <option value="month">Bulan Ini</option>
+            </select>
+          </div>
+          <div class="chart-wrap"><canvas id="salesChart"></canvas></div>
+        </div>
+
+        <div class="panel">
+          <div class="panel-head"><div><h2>Produk Terlaris</h2><p>Berdasarkan jumlah terjual</p></div></div>
+          <div id="topProducts" class="mini-list"></div>
+        </div>
+      </div>
+
+      <div class="panel">
+        <div class="panel-head">
+          <div><h2>Transaksi Terbaru</h2><p>Nota yang baru dibuat</p></div>
+          <button class="btn light" onclick="showPage('nota')">Lihat Nota</button>
+        </div>
+        <div class="table-scroll">
+          <table>
+            <thead><tr><th>No. Nota</th><th>Tanggal</th><th>Pelanggan</th><th>Total</th><th>Status</th><th>Aksi</th></tr></thead>
+            <tbody id="recentInvoices"></tbody>
+          </table>
+        </div>
+      </div>
+    </section>
+
+    <!-- NOTA -->
+    <section id="page-nota" class="page">
+      <div class="page-head">
+        <div><h1 id="invoicePageTitle">Buat Nota</h1><p>Buat dan kelola transaksi penjualan.</p></div>
+        <button class="btn light" onclick="resetInvoiceForm()">↻ Nota Baru</button>
+      </div>
+
+      <div class="invoice-layout">
+        <div class="panel">
+          <div class="panel-head"><div><h2>Data Nota</h2><p>Isi informasi transaksi atau gunakan Voice Kasir.</p></div><button class="btn small voice-btn" id="voiceInvoiceBtn" onclick="startVoiceInvoiceInput()">🎙️ Voice Kasir</button></div>
+          <div class="form-grid two">
+            <div class="field"><label>No. Nota</label><input id="invoiceNumber" readonly></div>
+            <div class="field"><label>Tanggal</label><input id="invoiceDate" type="date"></div>
+            <div class="field"><label>Status Pembayaran</label>
+              <select id="invoiceStatus"><option value="LUNAS">LUNAS</option><option value="BELUM LUNAS">BELUM LUNAS</option></select>
+            </div>
+            <div class="field"><label>Metode Pembayaran</label>
+              <select id="paymentMethod"><option>Tunai</option><option>Transfer Bank</option><option>QRIS</option><option>E-Wallet</option><option>Lainnya</option></select>
+            </div>
+            <div class="field"><label>Jatuh Tempo</label><input id="dueDate" type="date"></div>
+          </div>
+
+          <div class="section-title row-between"><span>Pelanggan</span><button class="btn small voice-btn" id="voiceCustomerInInvoiceBtn" onclick="startVoiceCustomerInInvoice()">🎙️ Isi Pelanggan</button></div>
+          <div class="form-grid three">
+            <div class="field"><label>Nama Pelanggan</label><input id="customerName" list="customerOptions" placeholder="Nama pelanggan"></div>
+            <div class="field"><label>No. WhatsApp</label><input id="customerPhone" placeholder="08xxxxxxxxxx"></div>
+            <div class="field"><label>Alamat</label><input id="customerAddress" placeholder="Alamat"></div>
+          </div>
+          <datalist id="customerOptions"></datalist>
+
+          <div class="section-title row-between">
+            <span>Item Produk</span>
+            <div class="item-actions">
+              <button class="btn small voice-btn" id="voiceProductBtn" onclick="startVoiceProductInput()">🎙️ Input Suara</button>
+              <button class="btn small primary" onclick="addInvoiceItem()">＋ Tambah Item</button>
+            </div>
+          </div>
+          <div id="voiceProductStatus" class="voice-status" hidden></div>
+          <div class="voice-help">Contoh: <b>“kopi 2, gula 2, beras 2”</b> — NotaKilat akan mencari produk yang sudah terdaftar dan memasukkan jumlahnya otomatis.</div>
+
+          <div class="table-scroll">
+            <table class="items-table">
+              <thead><tr><th>Produk</th><th>Deskripsi</th><th>Qty</th><th>Harga</th><th>Diskon</th><th>Total</th><th></th></tr></thead>
+              <tbody id="invoiceItems"></tbody>
+            </table>
+          </div>
+
+          <div class="invoice-bottom">
+            <div class="field full"><label>Catatan / Keterangan</label><textarea id="invoiceNote" placeholder="Catatan tambahan untuk pelanggan..."></textarea></div>
+            <div class="totals">
+              <div><span>Subtotal</span><strong id="invoiceSubtotal">Rp 0</strong></div>
+              <div><span>Diskon</span><strong id="invoiceDiscount">Rp 0</strong></div>
+              <div class="grand"><span>Total</span><strong id="invoiceTotal">Rp 0</strong></div>
+            </div>
+          </div>
+
+          <div class="form-actions">
+            <button class="btn light" onclick="previewInvoice()">👁 Preview</button>
+            <button class="btn primary" onclick="saveInvoice()">💾 Simpan Nota</button>
+          </div>
+        </div>
+      </div>
+
+      <div class="panel">
+        <div class="panel-head"><div><h2>Daftar Nota</h2><p>Semua transaksi tersimpan di perangkat ini.</p></div><input class="search" id="invoiceSearch" oninput="renderInvoiceList()" placeholder="🔎 Cari nota / pelanggan"></div>
+        <div class="table-scroll">
+          <table><thead><tr><th>No. Nota</th><th>Tanggal</th><th>Pelanggan</th><th>Total</th><th>Status</th><th>Aksi</th></tr></thead>
+          <tbody id="invoiceList"></tbody></table>
+        </div>
+      </div>
+    </section>
+
+    <!-- PRODUK -->
+    <section id="page-produk" class="page">
+      <div class="page-head"><div><h1>Produk</h1><p>Kelola harga dan stok barang.</p></div><button class="btn primary" onclick="openProductModal()">＋ Tambah Produk</button></div>
+      <div class="panel">
+        <div class="panel-head"><div><h2>Daftar Produk</h2><p id="productCount">0 produk</p></div><input class="search" id="productSearch" oninput="renderProducts()" placeholder="🔎 Cari produk"></div>
+        <div class="table-scroll">
+          <table><thead><tr><th>Produk</th><th>HPP</th><th>Harga Jual</th><th>Stok</th><th>Supplier / Kulakan</th><th>Status</th><th>Aksi</th></tr></thead><tbody id="productTable"></tbody></table>
+        </div>
+      </div>
+    </section>
+
+    <!-- KULAKAN -->
+    <section id="page-kulakan" class="page">
+      <div class="page-head"><div><h1>Kulakan</h1><p>Catat barang yang kamu beli dari supplier dan otomatis tambah stok.</p></div></div>
+      <div class="panel">
+        <div class="panel-head"><div><h2>Tambah Kulakan</h2><p>Contoh: beli beras 20 karung dari Toko Makmur.</p></div><button class="btn small voice-btn" onclick="startVoicePurchase()">🎙️ Voice Kulakan</button></div>
+        <div id="purchaseVoiceStatus" class="voice-status" hidden></div>
+        <div class="form-grid three">
+          <div class="field"><label>Produk</label><select id="purchaseProduct" onchange="syncPurchaseProduct()"><option value="">Pilih produk</option></select></div>
+          <div class="field"><label>Supplier / Tempat Kulakan</label><input id="purchaseSupplier" placeholder="Contoh: Toko Makmur / Pasar Induk"></div>
+          <div class="field"><label>Tanggal</label><input id="purchaseDate" type="date"></div>
+          <div class="field"><label>Jumlah Kulakan</label><input id="purchaseQty" type="number" min="1" placeholder="0"></div>
+          <div class="field"><label>Harga Modal / Unit</label><input id="purchaseCost" type="number" min="0" placeholder="0"></div>
+          <div class="field"><label>Catatan</label><input id="purchaseNote" placeholder="Contoh: beli grosir"></div>
+        </div>
+        <div class="voice-help">Bisa juga bilang: <b>“Beras 20, harga modal 12000, kulak di Toko Makmur”</b>. Stok akan bertambah otomatis dan HPP produk diperbarui.</div>
+        <div class="form-actions"><button class="btn primary" onclick="savePurchase()">💾 Simpan Kulakan</button></div>
+      </div>
+      <div class="panel">
+        <div class="panel-head"><div><h2>Riwayat Kulakan</h2><p id="purchaseCount">0 transaksi kulakan</p></div><input class="search" id="purchaseSearch" oninput="renderPurchases()" placeholder="🔎 Cari produk / supplier"></div>
+        <div class="table-scroll"><table><thead><tr><th>Tanggal</th><th>Produk</th><th>Supplier</th><th>Qty</th><th>Harga Modal</th><th>Total</th><th>Catatan</th></tr></thead><tbody id="purchaseTable"></tbody></table></div>
+      </div>
+    </section>
+
+    <!-- PELANGGAN -->
+    <section id="page-pelanggan" class="page">
+      <div class="page-head"><div><h1>Pelanggan</h1><p>Kelola data pelanggan dan riwayat transaksi.</p></div><button class="btn primary" onclick="openCustomerModal()">＋ Tambah Pelanggan</button></div>
+      <div class="panel">
+        <div class="panel-head"><div><h2>Daftar Pelanggan</h2><p id="customerCount">0 pelanggan</p></div><input class="search" id="customerSearch" oninput="renderCustomers()" placeholder="🔎 Cari pelanggan"></div>
+        <div class="table-scroll">
+          <table><thead><tr><th>Nama</th><th>WhatsApp</th><th>Alamat</th><th>Total Belanja</th><th>Aksi</th></tr></thead><tbody id="customerTable"></tbody></table>
+        </div>
+      </div>
+    </section>
+
+    <!-- SUPPLIER -->
+    <section id="page-supplier" class="page">
+      <div class="page-head"><div><h1>Supplier / Pemasok</h1><p>Kelola toko, agen, atau orang tempat kamu kulakan.</p></div><button class="btn primary" onclick="openSupplierModal()">＋ Tambah Supplier</button></div>
+      <div class="panel">
+        <div class="panel-head"><div><h2>Daftar Supplier</h2><p id="supplierCount">0 supplier</p></div><input class="search" id="supplierSearch" oninput="renderSuppliers()" placeholder="🔎 Cari supplier / kontak"></div>
+        <div class="table-scroll"><table><thead><tr><th>Supplier</th><th>Kontak</th><th>WhatsApp</th><th>Alamat</th><th>Produk</th><th>Aksi</th></tr></thead><tbody id="supplierTable"></tbody></table></div>
+      </div>
+    </section>
+
+    <!-- LAPORAN -->
+    <section id="page-laporan" class="page">
+      <div class="page-head">
+        <div><h1>Laporan</h1><p>Lihat omzet, laba kotor, metode pembayaran, dan produk terlaris.</p></div>
+        <button class="btn light" onclick="exportReportCsv()">📥 Export Laporan</button>
+      </div>
+      <div class="report-filter panel">
+        <div class="form-grid three">
+          <div class="field"><label>Dari</label><input id="reportFrom" type="date" onchange="renderReports()"></div>
+          <div class="field"><label>Sampai</label><input id="reportTo" type="date" onchange="renderReports()"></div>
+          <div class="field"><label>Status</label><select id="reportStatus" onchange="renderReports()"><option value="all">Semua</option><option value="LUNAS">LUNAS</option><option value="BELUM LUNAS">BELUM LUNAS</option></select></div>
+        </div>
+      </div>
+      <div class="stats-grid report-stats">
+        <div class="stat-card"><div class="stat-icon orange">💰</div><div><span>Omzet</span><strong id="reportRevenue">Rp 0</strong></div></div>
+        <div class="stat-card"><div class="stat-icon purple">📈</div><div><span>Laba Kotor</span><strong id="reportProfit">Rp 0</strong></div></div>
+        <div class="stat-card"><div class="stat-icon blue">🧾</div><div><span>Transaksi</span><strong id="reportCount">0</strong></div></div>
+        <div class="stat-card"><div class="stat-icon red">🛒</div><div><span>Rata-rata Nota</span><strong id="reportAverage">Rp 0</strong></div></div>
+      </div>
+      <div class="dashboard-grid">
+        <div class="panel"><div class="panel-head"><div><h2>Metode Pembayaran</h2><p>Jumlah transaksi dan nilai penjualan.</p></div></div><div id="paymentReport" class="mini-list"></div></div>
+        <div class="panel"><div class="panel-head"><div><h2>Produk Terlaris</h2><p>Berdasarkan unit terjual.</p></div></div><div id="reportTopProducts" class="mini-list"></div></div>
+      </div>
+      <div class="panel">
+        <div class="panel-head"><div><h2>Ringkasan Transaksi</h2><p>Data sesuai filter laporan.</p></div></div>
+        <div class="table-scroll"><table><thead><tr><th>No. Nota</th><th>Tanggal</th><th>Pelanggan</th><th>Metode</th><th>Status</th><th>Total</th><th>Laba Kotor</th></tr></thead><tbody id="reportTable"></tbody></table></div>
+      </div>
+    </section>
+
+    <!-- DATABASE -->
+    <section id="page-database" class="page">
+      <div class="page-head">
+        <div><h1>Backup & Data</h1><p>Data tersimpan di perangkat. Backup dan pindahkan data kapan saja.</p></div>
+      </div>
+
+      <div class="database-status" id="databaseStatusCard">
+        <div class="db-status-icon">💾</div>
+        <div class="db-status-text"><strong id="databaseStatusTitle">🟢 Database lokal aktif</strong><span id="databaseStatusText">Data NotaKilat tersimpan di perangkat ini. Tidak dikirim ke server.</span></div>
+        <span class="db-pending" id="databasePending">Offline-first</span>
+      </div>
+
+      <div class="db-grid">
+        <button class="db-card" onclick="syncNow()"><div class="db-card-icon sync">🔄</div><div><strong>Refresh Database</strong><p>Muat ulang data lokal yang tersimpan di perangkat ini.</p></div></button>
+        <button class="db-card" onclick="exportCsv()"><div class="db-card-icon csv">📥</div><div><strong>Export CSV</strong><p>Download data dalam format tabel yang mudah dibuka di Excel atau Google Sheets.</p></div></button>
+        <button class="db-card" onclick="document.getElementById('importCsvInput').click()"><div class="db-card-icon import">📤</div><div><strong>Import CSV</strong><p>Masukkan kembali data tabel dari file CSV.</p></div></button>
+        <button class="db-card" onclick="exportBackupJson()"><div class="db-card-icon backup">💾</div><div><strong>Backup Lengkap</strong><p>Simpan seluruh database NotaKilat ke satu file untuk cadangan atau pindah perangkat.</p></div></button>
+        <button class="db-card" onclick="document.getElementById('importJsonInput').click()"><div class="db-card-icon restore">♻️</div><div><strong>Restore Backup</strong><p>Kembalikan seluruh data NotaKilat dari file backup.</p></div></button>
+        <button class="db-card danger-card" onclick="resetAllData()"><div class="db-card-icon danger">🗑️</div><div><strong>Reset Semua Data</strong><p>Hapus seluruh database lokal di perangkat ini. Gunakan dengan hati-hati.</p></div></button>
+      </div>
+
+      <div class="panel db-info">
+        <div class="panel-head"><div><h2>Catatan Database</h2><p>NotaKilat Offline menyimpan data langsung di perangkat.</p></div></div>
+        <div class="info-list">
+          <div><b>CSV</b><span>Format tabel untuk dibuka atau diolah di Excel/Google Sheets.</span></div>
+          <div><b>Backup</b><span>File backup internal menyimpan struktur database lengkap, termasuk item-item nota. Tidak perlu dibuka manual.</span></div>
+          <div><b>Privasi</b><span>Versi Offline tidak mengirim data pelanggan, produk, atau nota ke Google Sheets/server.</span></div>
+        </div>
+      </div>
+    </section>
+
+    <!-- PROFIL -->
+    <section id="page-profil" class="page">
+      <div class="page-head"><div><h1>Profil Toko</h1><p>Informasi yang tampil di nota.</p></div></div>
+      <div class="panel">
+        <div class="form-grid two">
+          <div class="field"><label>Nama Toko</label><input id="storeName" placeholder="Nama toko"></div>
+          <div class="field"><label>No. WhatsApp</label><input id="storePhone" placeholder="08xxxxxxxxxx"></div>
+          <div class="field"><label>Alamat</label><textarea id="storeAddress"></textarea></div>
+          <div class="field"><label>Catatan Footer</label><textarea id="storeFooter" placeholder="Terima kasih sudah berbelanja..."></textarea></div>
+          <div class="field"><label>Nama Bank</label><input id="bankName" placeholder="BCA / BRI / BSI"></div>
+          <div class="field"><label>No. Rekening</label><input id="bankAccount" placeholder="Nomor rekening"></div>
+          <div class="field"><label>Atas Nama</label><input id="bankHolder" placeholder="Nama pemilik rekening"></div>
+          <div class="field"><label>Tampilan Aplikasi</label><select id="storeTheme" onchange="applyTheme(this.value)"><option value="modern">✨ Modern</option><option value="dotmatrix">⠿ Dot Matrix</option></select></div>
+          <div class="field"><label>Format Nota Default</label><select id="invoiceStyleDefault"><option value="modern">✨ Modern</option><option value="thermal">🧾 Thermal / Dot Matrix (Nota Panjang)</option></select></div>
+          <div class="field"><label>Logo Toko</label><input id="storeLogo" type="file" accept="image/*"></div>
+          <div class="field"><label>Keamanan</label><div class="inline-setting"><input type="checkbox" id="pinEnabled"><span>Aktifkan PIN saat membuka NotaKilat</span></div><input id="storePin" type="password" inputmode="numeric" autocomplete="new-password" placeholder="PIN Toko (opsional)" maxlength="12"><small class="muted">PIN disimpan hanya di perangkat ini. Untuk keamanan nyata berbasis akun, diperlukan server.</small></div>
+        </div>
+        <div class="logo-preview"><img id="logoPreview" alt="Logo"></div>
+        <small class="muted">Logo boleh besar. NotaKilat akan mengoptimalkan ukuran otomatis untuk penyimpanan offline.</small>
+        <div class="form-actions"><button class="btn primary" onclick="saveProfile()">💾 Simpan Profil</button><button class="btn light" onclick="lockApp()">🔒 Kunci Sekarang</button></div>
+      </div>
+    </section>
+  </main>
+</div>
+
+<!-- FREE / PRO LOCK MODAL -->
+<div id="upgradeModal" class="modal upgrade-modal">
+  <div class="modal-card upgrade-card">
+    <button class="upgrade-close" onclick="closeUpgradeModal()">×</button>
+    <div class="upgrade-icon">🔒</div>
+    <div class="upgrade-badge">NOTAKILAT PRO</div>
+    <h2>Buka Semua Fitur</h2>
+    <p>Fitur ini tersedia di NotaKilat Pro. Versi gratis tetap bisa dipakai untuk membuat nota dan mengelola profil toko.</p>
+    <a class="btn primary upgrade-btn" href="https://lynk.id/produktifwithai/l40lygmyjlko" target="_blank" rel="noopener">🔓 Buka Akses Semua Fitur</a>
+    <a class="btn whatsapp-upgrade" href="https://wa.me/6285755643820?text=Hai%20Mas%20Agustriian%2C%20mau%20buka%20akses%20semua%20fitur%20NotaKilat%20Pro%20dong%2C%20makasih" target="_blank" rel="noopener">💬 Hubungi WA Admin</a>
+    <small>NotaKilat Free • Offline di perangkat • Tanpa perlu login</small>
+  </div>
+</div>
+
+<!-- MODAL PRODUK -->
+<div id="productModal" class="modal">
+  <div class="modal-card">
+    <div class="modal-head"><h2 id="productModalTitle">Tambah Produk</h2><button onclick="closeModal('productModal')">×</button></div>
+    <input type="hidden" id="productEditId">
+    <div class="field"><label>Nama Produk</label><div class="input-with-voice"><input id="productName" placeholder="Contoh: Kopi Susu"><button type="button" class="btn small voice-btn" onclick="startVoiceProductForm()">🎙️</button></div></div>
+    <div class="form-grid three">
+      <div class="field"><label>HPP / Modal</label><input id="productHpp" type="number" min="0" placeholder="0"></div>
+      <div class="field"><label>Harga Jual</label><input id="productPrice" type="number" min="0"></div>
+      <div class="field"><label>Stok</label><input id="productStock" type="number" min="0"></div>
+      <div class="field"><label>Stok Minimum</label><input id="productStockMin" type="number" min="0" placeholder="Contoh: 5"></div>
+      <div class="field"><label>Supplier / Pemasok</label><select id="productSupplier"><option value="">Pilih supplier</option></select></div>
+    </div>
+    <div id="productVoiceStatus" class="voice-status" hidden></div><div class="voice-help">Contoh: <b>“Kopi Susu, HPP 7000, harga jual 12000, stok 20, kulak di Toko Makmur”</b></div><div class="modal-actions"><button class="btn light" onclick="closeModal('productModal')">Batal</button><button class="btn primary" onclick="saveProduct()">Simpan</button></div>
+  </div>
+</div>
+
+<!-- MODAL CUSTOMER -->
+<div id="customerModal" class="modal">
+  <div class="modal-card">
+    <div class="modal-head"><h2 id="customerModalTitle">Tambah Pelanggan</h2><button onclick="closeModal('customerModal')">×</button></div>
+    <input type="hidden" id="customerEditId">
+    <div class="field"><label>Nama</label><div class="input-with-voice"><input id="customerFormName"><button type="button" class="btn small voice-btn" onclick="startVoiceCustomerForm()">🎙️</button></div></div>
+    <div class="field"><label>WhatsApp</label><input id="customerFormPhone"></div>
+    <div class="field"><label>Alamat</label><textarea id="customerFormAddress"></textarea></div><div id="customerVoiceStatus" class="voice-status" hidden></div><div class="voice-help">Contoh: <b>“Agus, 08123456789, Sidoarjo”</b></div>
+    <div class="modal-actions"><button class="btn light" onclick="closeModal('customerModal')">Batal</button><button class="btn primary" onclick="saveCustomer()">Simpan</button></div>
+  </div>
+</div>
+
+<!-- MODAL SUPPLIER -->
+<div id="supplierModal" class="modal">
+  <div class="modal-card">
+    <div class="modal-head"><h2 id="supplierModalTitle">Tambah Supplier</h2><button onclick="closeModal('supplierModal')">×</button></div>
+    <input type="hidden" id="supplierEditId">
+    <div class="field"><label>Nama Supplier / Toko</label><div class="input-with-voice"><input id="supplierFormName" placeholder="Contoh: Toko Makmur"><button type="button" class="btn small voice-btn" onclick="startVoiceSupplierForm()">🎙️</button></div></div>
+    <div class="form-grid two">
+      <div class="field"><label>Nama Kontak</label><input id="supplierFormContact" placeholder="Nama pemilik / sales"></div>
+      <div class="field"><label>WhatsApp</label><input id="supplierFormPhone" placeholder="08xxxxxxxxxx"></div>
+      <div class="field"><label>Alamat</label><textarea id="supplierFormAddress"></textarea></div>
+      <div class="field"><label>Catatan</label><textarea id="supplierFormNote" placeholder="Hari kirim, minimum order, dll."></textarea></div>
+    </div>
+    <div id="supplierVoiceStatus" class="voice-status" hidden></div><div class="voice-help">Contoh: <b>“Toko Makmur, kontak Budi, 08123456789, Pasar Wonokromo”</b></div>
+    <div class="modal-actions"><button class="btn light" onclick="closeModal('supplierModal')">Batal</button><button class="btn primary" onclick="saveSupplier()">Simpan</button></div>
+  </div>
+</div>
+
+<!-- PREVIEW -->
+<div id="previewModal" class="modal">
+  <div class="modal-card preview-modal">
+    <div class="modal-head">
+      <div>
+        <h2>Preview Nota</h2>
+        <div class="preview-format no-print">
+          <span class="format-label">Format Nota</span>
+          <div class="format-switch">
+            <button id="previewModernBtn" class="format-btn active" onclick="setInvoiceStyle('modern')">✨ Modern</button>
+            <button id="previewThermalBtn" class="format-btn" onclick="setInvoiceStyle('thermal')">🧾 Thermal 80mm</button>
+          </div>
+        </div>
+      </div>
+      <button onclick="closeModal('previewModal')">×</button>
+    </div>
+    <div id="invoicePreview" class="invoice-preview-stage"></div>
+    <div class="modal-actions no-print">
+      <button class="btn light" onclick="closeModal('previewModal')">Tutup</button>
+      <button class="btn light" onclick="downloadPreviewImage()">🖼 Download Gambar</button>
+      <button class="btn light" onclick="sharePreviewWhatsApp()">📲 Kirim WhatsApp</button>
+      <button class="btn primary" onclick="printInvoice()">🖨 Cetak</button>
+    </div>
+  </div>
+</div>
+
+<div id="pinGate" class="pin-gate" hidden>
+  <div class="pin-card"><div class="pin-logo">🔐</div><h2>NotaKilat Terkunci</h2><p>Masukkan PIN toko untuk melanjutkan.</p><input id="pinInput" type="password" inputmode="numeric" autocomplete="off" placeholder="PIN"><button class="btn primary" onclick="unlockApp()">Masuk</button><div id="pinError" class="pin-error"></div></div>
+</div>
+<script src="script.js"></script>
+</body>
+</html>

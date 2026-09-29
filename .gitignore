@@ -1,0 +1,16 @@
+# OS / editor
+.DS_Store
+Thumbs.db
+.vscode/
+.idea/
+
+# Local/private files
+*.local
+.env
+.env.*
+!.env.example
+
+# Backups / temporary exports
+*.bak
+*.backup
+*.tmp
