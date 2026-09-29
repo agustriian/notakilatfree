@@ -276,3 +276,24 @@ html, body {
   .main-content { padding-left: 10px !important; padding-right: 10px !important; }
   .page-head h1 { font-size: 22px !important; line-height: 1.2 !important; }
 }
+
+/* V16 MOBILE SIDEBAR FIX
+   The previous mobile sidebar used a fixed left offset (-250px). Because the
+   sidebar width is responsive (up to 88vw), part of it could remain visible
+   and cover the first ~20-70px of the page content. Hide it by its full width.
+*/
+@media (max-width: 800px) {
+  #sidebar,
+  .sidebar {
+    left: 0 !important;
+    transform: translateX(-100%) !important;
+    width: min(270px, 88vw) !important;
+    max-width: 88vw !important;
+    transition: transform .25s ease !important;
+  }
+  #sidebar.open,
+  .sidebar.open {
+    left: 0 !important;
+    transform: translateX(0) !important;
+  }
+}
