@@ -311,7 +311,7 @@
           <div class="field"><label>Tampilan Aplikasi</label><select id="storeTheme" onchange="applyTheme(this.value)"><option value="modern">✨ Modern</option><option value="dotmatrix">⠿ Dot Matrix</option></select></div>
           <div class="field"><label>Format Nota Default</label><select id="invoiceStyleDefault"><option value="modern">✨ Modern</option><option value="thermal">🧾 Thermal / Dot Matrix (Nota Panjang)</option></select></div>
           <div class="field"><label>Logo Toko</label><input id="storeLogo" type="file" accept="image/*"></div>
-          <div class="field"><label>Keamanan</label><div class="inline-setting"><input type="checkbox" id="pinEnabled"><span>Aktifkan PIN saat membuka NotaKilat</span></div><input id="storePin" type="password" inputmode="numeric" autocomplete="new-password" placeholder="PIN Toko (opsional)" maxlength="12"><small class="muted">PIN disimpan hanya di perangkat ini. Untuk keamanan nyata berbasis akun, diperlukan server.</small></div>
+          <div class="field"><label>Keamanan</label><div class="inline-setting"><input type="checkbox" id="pinEnabled"><span>Aktifkan PIN saat membuka NotaKilat</span></div></div>
         </div>
         <div class="logo-preview"><img id="logoPreview" alt="Logo"></div>
         <small class="muted">Logo boleh besar. NotaKilat akan mengoptimalkan ukuran otomatis untuk penyimpanan offline.</small>
@@ -329,7 +329,7 @@
     <div class="upgrade-badge">NOTAKILAT PRO</div>
     <h2>Buka Semua Fitur</h2>
     <p>Fitur ini tersedia di NotaKilat Pro. Versi gratis tetap bisa dipakai untuk membuat nota dan mengelola profil toko.</p>
-    <a class="btn primary upgrade-btn" href="https://lynk.id/produktifwithai/l40lygmyjlko" target="_blank" rel="noopener">🔓 Buka Akses Semua Fitur</a>
+    <a class="btn primary upgrade-btn" href="http://lynk.id/produktifwithai/l40lygmyjlko" target="_blank" rel="noopener">🔓 Buka Akses Semua Fitur</a>
     <a class="btn whatsapp-upgrade" href="https://wa.me/6285755643820?text=Hai%20Mas%20Agustriian%2C%20mau%20buka%20akses%20semua%20fitur%20NotaKilat%20Pro%20dong%2C%20makasih" target="_blank" rel="noopener">💬 Hubungi WA Admin</a>
     <small>NotaKilat Free • Offline di perangkat • Tanpa perlu login</small>
   </div>
@@ -408,7 +408,11 @@
 </div>
 
 <div id="pinGate" class="pin-gate" hidden>
-  <div class="pin-card"><div class="pin-logo">🔐</div><h2>NotaKilat Terkunci</h2><p>Masukkan PIN toko untuk melanjutkan.</p><input id="pinInput" type="password" inputmode="numeric" autocomplete="off" placeholder="PIN"><button class="btn primary" onclick="unlockApp()">Masuk</button><div id="pinError" class="pin-error"></div></div>
+  <div class="pin-card"><div class="pin-logo">🔐</div><h2>NotaKilat Terkunci</h2><p>Masukkan PIN toko untuk melanjutkan.</p><div class="pin-input-wrap" style="position:relative;display:flex;align-items:center;margin:12px 0 10px;">
+  <input id="pinInput" type="password" inputmode="text" autocomplete="off" placeholder="PIN" style="width:100%;padding-right:52px;margin:0;">
+  <button id="togglePin" type="button" onclick="togglePinVisibility()" aria-label="Tampilkan PIN" title="Tampilkan PIN" style="position:absolute;right:8px;top:50%;transform:translateY(-50%);width:40px;height:40px;border:0;background:transparent;border-radius:10px;cursor:pointer;font-size:20px;display:grid;place-items:center;">👁️</button>
+</div>
+<button class="btn primary" onclick="unlockApp()">Masuk</button><div id="pinError" class="pin-error"></div></div>
 </div>
 <script src="script.js"></script>
 </body>

@@ -3,12 +3,23 @@
    Local-only database. No Google Sheets / API required.
 ========================================================= */
 
-const CACHE_KEY = "notakilat_offline_db_v5";
+const CACHE_KEY = "notakilat_offline_db_v6";
+const STORE_PIN = "bismill4h";
+
+function togglePinVisibility(){
+  const input = document.getElementById("pinInput");
+  const button = document.getElementById("togglePin");
+  if(!input || !button) return;
+  const visible = input.type === "text";
+  input.type = visible ? "password" : "text";
+  button.textContent = visible ? "👁️" : "🙈";
+  button.setAttribute("aria-label", visible ? "Tampilkan PIN" : "Sembunyikan PIN");
+}
 
 const defaultDB = {
   profile: {
     name: "Toko Saya", phone: "", address: "", footer: "Terima kasih sudah berbelanja.",
-    bankName: "", bankAccount: "", bankHolder: "", logo: "", theme: "modern", invoiceStyle: "modern", pinEnabled: false, pinCode: "", pinCode: ""
+    bankName: "", bankAccount: "", bankHolder: "", logo: "", theme: "modern", invoiceStyle: "modern", pinEnabled: true
   },
   products: [], customers: [], suppliers: [], invoices: [], purchases: []
 };
@@ -37,7 +48,14 @@ document.addEventListener("DOMContentLoaded", async () => {
 
 function loadCache() {
   try {
-    const raw = localStorage.getItem(CACHE_KEY);
+    let raw = localStorage.getItem(CACHE_KEY);
+    if (!raw) {
+      const legacy = localStorage.getItem("notakilat_offline_db_v5");
+      if (legacy) {
+        raw = legacy;
+        localStorage.setItem(CACHE_KEY, legacy);
+      }
+    }
     if (!raw) return structuredClone(defaultDB);
     const p = JSON.parse(raw);
     return {
@@ -186,13 +204,13 @@ function toggleSidebar() {
 
 function initPinGate(){
   const gate=document.getElementById("pinGate");
-  if(!gate || !db.profile.pinEnabled || !String(db.profile.pinCode||"").trim() || sessionStorage.getItem("notakilat_unlocked")==="1") return;
+  if(!gate || !db.profile.pinEnabled || sessionStorage.getItem("notakilat_unlocked")==="1") return;
   gate.hidden=false; setTimeout(()=>document.getElementById("pinInput")?.focus(),50);
   document.getElementById("pinInput")?.addEventListener("keydown",e=>{if(e.key==="Enter")unlockApp()});
 }
 function unlockApp(){
   const val=document.getElementById("pinInput")?.value||"";
-  if(val===String(db.profile.pinCode||"")){sessionStorage.setItem("notakilat_unlocked","1");document.getElementById("pinGate").hidden=true;toast("NotaKilat terbuka.");}
+  if(val===STORE_PIN){sessionStorage.setItem("notakilat_unlocked","1");document.getElementById("pinGate").hidden=true;toast("NotaKilat terbuka.");}
   else {const e=document.getElementById("pinError");if(e)e.textContent="PIN salah. Coba lagi.";}
 }
 function lockApp(){sessionStorage.removeItem("notakilat_unlocked");location.reload();}
@@ -1302,7 +1320,7 @@ function loadProfileForm(){
   document.getElementById("bankName").value=p.bankName||"";
   document.getElementById("bankAccount").value=p.bankAccount||"";
   document.getElementById("bankHolder").value=p.bankHolder||"";
-  const pin=document.getElementById("pinEnabled"); if(pin) pin.checked=!!p.pinEnabled; const pinCode=document.getElementById("storePin"); if(pinCode) pinCode.value=p.pinCode||"";
+  const pin=document.getElementById("pinEnabled"); if(pin) pin.checked=p.pinEnabled!==false;
   const invoiceStyleSelect=document.getElementById("invoiceStyleDefault");
   if(invoiceStyleSelect) invoiceStyleSelect.value=currentInvoiceStyle;
   document.getElementById("storeNameTop").textContent=p.name||"Toko Saya";
@@ -1366,7 +1384,7 @@ async function saveProfile(){
     name:document.getElementById("storeName").value.trim()||"Toko Saya", phone:document.getElementById("storePhone").value.trim(),
     address:document.getElementById("storeAddress").value.trim(), footer:document.getElementById("storeFooter").value.trim(),
     bankName:document.getElementById("bankName").value.trim(), bankAccount:document.getElementById("bankAccount").value.trim(),
-    bankHolder:document.getElementById("bankHolder").value.trim(), pinEnabled:!!document.getElementById("pinEnabled")?.checked, pinCode:document.getElementById("storePin")?.value.trim()||"", logo:db.profile.logo||"", theme:document.getElementById("storeTheme").value||"modern",
+    bankHolder:document.getElementById("bankHolder").value.trim(), pinEnabled:!!document.getElementById("pinEnabled")?.checked, logo:db.profile.logo||"", theme:document.getElementById("storeTheme").value||"modern",
     invoiceStyle:document.getElementById("invoiceStyleDefault")?.value || currentInvoiceStyle || "modern"
   };
   applyLocalSaveProfile(data);
